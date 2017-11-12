@@ -164,3 +164,29 @@ func TestUnmarshalMessage_Fail(t *testing.T) {
 		})
 	}
 }
+
+func TestMessage_String(t *testing.T) {
+	tests := []struct {
+		name      string
+		initiator LogicalAddr
+		follower  LogicalAddr
+		cmd       Command
+		want      string
+	}{
+		{"direct", TV, AudioSystem, GiveAudioStatus{}, "TV → AudioSystem: cec.GiveAudioStatus {}"},
+		{"from_unregistered", Unregistered, AudioSystem, GiveAudioStatus{}, "Unregistered → AudioSystem: cec.GiveAudioStatus {}"},
+		{"to_broadcast", TV, Broadcast, GiveAudioStatus{}, "TV → Broadcast: cec.GiveAudioStatus {}"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := Message{
+				Initiator: tt.initiator,
+				Follower:  tt.follower,
+				Cmd:       tt.cmd,
+			}
+			if got := m.String(); got != tt.want {
+				t.Errorf("Message.String() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

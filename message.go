@@ -42,7 +42,23 @@ type Message struct {
 
 // Message implements the Stringer interface.
 func (m Message) String() string {
-	return fmt.Sprintf("%s -> %s: %T %v", m.Initiator, m.Follower, m.Cmd, m.Cmd)
+	// Broadcast and Unregistered share the same value, the meaning depends on context.
+	i := m.Initiator.String()
+	f := m.Follower.String()
+	if m.Initiator == Unregistered {
+		i = "Unregistered"
+	}
+	if m.Follower == Broadcast {
+		f = "Broadcast"
+	}
+
+	s := fmt.Sprintf("%v", m.Cmd)
+	if s == "{{}}" {
+		// Cleanup emptyCommand results
+		s = "{}"
+	}
+
+	return fmt.Sprintf("%s → %s: %T %v", i, f, m.Cmd, s)
 }
 
 // Creates a message from a given Packet.

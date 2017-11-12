@@ -54,8 +54,7 @@ func (m Message) String() string {
 
 	s := fmt.Sprintf("%v", m.Cmd)
 	if s == "{{}}" {
-		// Cleanup emptyCommand results
-		s = "{}"
+		s = "{}" // Cleanup emptyCommand results
 	}
 
 	return fmt.Sprintf("%s → %s: %T %v", i, f, m.Cmd, s)

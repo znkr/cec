@@ -82,3 +82,7 @@ func main() {
 
 Since the `raspberrypi` package depends on Raspberry Pi C interfaces, it is easiest to build the
 binary directly on the device instead of using a cross compiler.
+
+## Disclaimer
+
+This is not an official Google product.

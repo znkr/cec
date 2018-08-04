@@ -15,11 +15,12 @@
 package cec_test
 
 import (
-	"github.com/krynr/cec/device/fake"
+	"reflect"
 	"testing"
 
+	"github.com/krynr/cec/device/fake"
+
 	. "github.com/krynr/cec"
-	"reflect"
 )
 
 func TestCec(t *testing.T) {
@@ -88,7 +89,7 @@ func TestCec(t *testing.T) {
 
 		// Tests overriding an response from the default handler
 		{
-			name:  "override_default_handler",
+			name: "override_default_handler",
 			setup: func(c *Cec) {
 				c.AddHandleFunc(func(x *Cec, msg Message) bool {
 					switch msg.Cmd.(type) {
@@ -99,7 +100,7 @@ func TestCec(t *testing.T) {
 					return false
 				})
 				c.AddHandler(&DefaultHandler{})
-				},
+			},
 			in: []Packet{
 				{TV, AudioSystem, OpGiveDeviceVendorID, nil},
 				{TV, AudioSystem, OpGetCECVersion, nil},
@@ -114,7 +115,7 @@ func TestCec(t *testing.T) {
 
 		// Tests sending things early
 		{
-			name:  "send_early",
+			name: "send_early",
 			setup: func(c *Cec) {
 				c.Send(TV, Standby{})
 			},
@@ -127,55 +128,55 @@ func TestCec(t *testing.T) {
 		// Tests without any handlers
 		{
 			// Unhandled broadcasts are ignored
-			name:  "unhandled_broadcast",
+			name: "unhandled_broadcast",
 			in: []Packet{
 				{TV, Broadcast, OpActiveSource, PhysicalAddress(0x1010).Bytes()},
 			},
 			out: []Packet{},
 		}, {
 			// A direct-only message send as broadcast must be ignored
-			name:  "direct_only_message_as_broadcast",
+			name: "direct_only_message_as_broadcast",
 			in: []Packet{
 				{TV, AudioSystem, OpActiveSource, PhysicalAddress(0x1010).Bytes()},
 			},
 			out: []Packet{},
 		}, {
 			// Must be ignored because it's from unregistered and non of the exceptions match
-			name:  "message_from_unregistered",
+			name: "message_from_unregistered",
 			in: []Packet{
 				{Unregistered, Broadcast, OpActiveSource, PhysicalAddress(0x1010).Bytes()},
 			},
 			out: []Packet{},
 		}, {
 			// No reply for standby
-			name:  "standby",
+			name: "standby",
 			in: []Packet{
 				{TV, AudioSystem, OpStandby, nil},
 			},
 			out: []Packet{},
 		}, {
-			name:  "standby_as_broadcast",
+			name: "standby_as_broadcast",
 			in: []Packet{
 				{TV, Broadcast, OpStandby, nil},
 			},
 			out: []Packet{},
 		}, {
 			// Standby from unregistered is allowed but doesn't produce a response
-			name:  "standby_from_unregistered",
+			name: "standby_from_unregistered",
 			in: []Packet{
 				{Unregistered, AudioSystem, OpStandby, nil},
 			},
 			out: []Packet{},
 		}, {
 			// Feature aborts don't get a response
-			name:  "unexpected_feature_abort",
+			name: "unexpected_feature_abort",
 			in: []Packet{
 				{TV, AudioSystem, OpFeatureAbort, []byte{byte(OpSetOSDName), byte(AbortInvalidOperand)}},
 			},
 			out: []Packet{},
 		}, {
 			// Unhandled direct messages are answered by a feature abort
-			name:  "unhandled_message",
+			name: "unhandled_message",
 			in: []Packet{
 				{TV, AudioSystem, OpGiveDeviceVendorID, nil},
 			},
@@ -184,7 +185,7 @@ func TestCec(t *testing.T) {
 			},
 		}, {
 			// Invalid messages are answered by a feature abort
-			name:  "invalid_message",
+			name: "invalid_message",
 			in: []Packet{
 				{TV, AudioSystem, OpSetOSDName, nil},
 			},
@@ -193,7 +194,7 @@ func TestCec(t *testing.T) {
 			},
 		}, {
 			// Unknown opcodes are answered by a feature abort
-			name:  "unkown_opcode",
+			name: "unkown_opcode",
 			in: []Packet{
 				{TV, AudioSystem, OpCode(254), nil},
 			},
@@ -202,21 +203,21 @@ func TestCec(t *testing.T) {
 			},
 		}, {
 			// Unknown opcodes as broadcasts are ignored
-			name:  "unkown_opcode_broadcast",
+			name: "unkown_opcode_broadcast",
 			in: []Packet{
 				{TV, Broadcast, OpCode(254), nil},
 			},
 			out: []Packet{},
 		}, {
 			// Unknown opcodes from unregistered are ignored
-			name:  "unkown_opcode_broadcast",
+			name: "unkown_opcode_broadcast",
 			in: []Packet{
 				{Unregistered, AudioSystem, OpCode(254), nil},
 			},
 			out: []Packet{},
 		}, {
 			// Invalid message broadcasts are ignored
-			name:  "invalid_message_as_broadcast",
+			name: "invalid_message_as_broadcast",
 			in: []Packet{
 				{TV, Broadcast, OpSetOSDName, nil},
 			},
@@ -258,5 +259,14 @@ func TestCec(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestInvalidOsdName(t *testing.T) {
+	_, err := New(fake.New(AudioSystem, DeviceTypeAudio), Config{
+		OSDName: "This OSD name is too long",
+	})
+	if err == nil {
+		t.Errorf("Expected failure due to invalid OSD name, but succeeded.")
 	}
 }

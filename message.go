@@ -361,6 +361,13 @@ func unmarshalCommand(op OpCode, data []byte) (Command, error) {
 	}
 }
 
+func MakeUnknownCmd(op OpCode, data []byte) UnkownCmd {
+	return UnkownCmd{
+		op:   op,
+		data: data,
+	}
+}
+
 func (c UnkownCmd) Op() OpCode                 { return c.op }
 func (c ActiveSource) Op() OpCode              { return OpActiveSource }
 func (c FeatureAbort) Op() OpCode              { return OpFeatureAbort }

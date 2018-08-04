@@ -31,7 +31,21 @@ type Cec struct {
 	dev      Device
 	osd      string
 	handlers []Handler
+	spy      chan<- Message
+	spyDone  <-chan struct{}
 	started  bool
+}
+
+// Creates a new Cec object using dev to communicate with the hardware.
+func New(dev Device, c Config) (*Cec, error) {
+	if !isValidOsdName(c.OSDName) {
+		return nil, InvalidOSDName{}
+	}
+	return &Cec{
+		dev:      dev,
+		osd:      c.OSDName,
+		handlers: []Handler{},
+	}, nil
 }
 
 // A Handler for HDMI CEC messages.
@@ -119,18 +133,6 @@ func (h DefaultHandler) HandleMessage(x *Cec, msg Message) bool {
 	return false
 }
 
-// Creates a new Cec object using dev to communicate with the hardware.
-func New(dev Device, c Config) (*Cec, error) {
-	if !isValidOsdName(c.OSDName) {
-		return nil, InvalidOSDName{}
-	}
-	return &Cec{
-		dev:      dev,
-		osd:      c.OSDName,
-		handlers: []Handler{},
-	}, nil
-}
-
 // Adds a handler. If more than one handler is added all handlers are tried until one handler
 // returns true. May only be called before Start() was called.
 func (x *Cec) AddHandler(h Handler) {
@@ -146,13 +148,73 @@ func (x *Cec) AddHandleFunc(f func(x *Cec, msg Message) bool) {
 	x.AddHandler(HandlerFunc(f))
 }
 
+// A Listener for all incoming and outgoing HDMI CEC messages.
+type Listener interface {
+	Message(msg Message)
+}
+
+// A function wrapper for Listener.
+type ListenerFunc func(msg Message)
+
+func (f ListenerFunc) Message(msg Message) {
+	f(msg)
+}
+
+func spy(l Listener) (chan<- Message, <-chan struct{}) {
+	c := make(chan Message, 64)
+	done := make(chan struct{})
+	go func() {
+		for msg := range c {
+			l.Message(msg)
+		}
+		close(done)
+	}()
+	return c, done
+}
+
+// Sets the listener. May only be called once before Start() was called.
+func (x *Cec) SetListener(l Listener) {
+	if x.started {
+		log.Panic("Already started.")
+	}
+	if x.spy != nil {
+		log.Panic("Listener already set.")
+	}
+	x.spy, x.spyDone = spy(l)
+}
+
+// Sets the listener. May only be called once before Start() was called.
+func (x *Cec) SetListenerFunc(f func(msg Message)) {
+	x.SetListener(ListenerFunc(f))
+}
+
+func (x *Cec) spyIncoming(msg Message) {
+	if x.spy != nil {
+		x.spy <- msg
+	}
+}
+
+func (x *Cec) spyIncomingError(p Packet) {
+	if x.spy != nil {
+		x.spy <- Message{
+			Initiator: p.Initiator,
+			Follower:  p.Follower,
+			Cmd:       MakeUnknownCmd(p.Op, p.Data),
+		}
+	}
+}
+
 // Starts receiving and handling CEC messages.
 func (x *Cec) Run() {
+	if x.started {
+		log.Panic("Already started.")
+	}
 	x.started = true
 	unhandledHandler := UnhandledHandler{}
 	for p := range x.dev.Receive() {
 		msg, err := UnmarshalMessage(p)
 		if err != nil {
+			x.spyIncomingError(p)
 			log.Printf("Unable to unmarshal message %s: %s", p, err)
 			if p.Follower != Broadcast && p.Initiator != Unregistered {
 				// Signal the initiator that acting upon the received packet is not possible.
@@ -163,6 +225,7 @@ func (x *Cec) Run() {
 			}
 			continue
 		}
+		x.spyIncoming(msg)
 
 		// Some messages need to be ignored according to the spec.
 		flags, ok := getOpCodeFlags(msg.Cmd.Op())
@@ -203,6 +266,20 @@ func (x *Cec) Run() {
 			unhandledHandler.HandleMessage(x, msg)
 		}
 	}
+	if x.spy != nil {
+		close(x.spy)
+		<-x.spyDone
+	}
+}
+
+func (x *Cec) spyOutgoing(follower LogicalAddr, cmd Command) {
+	if x.spy != nil {
+		x.spy <- Message{
+			Initiator: x.dev.GetLogicalAddress(),
+			Follower:  follower,
+			Cmd:       cmd,
+		}
+	}
 }
 
 // Sends cmd to follower.
@@ -211,6 +288,7 @@ func (x *Cec) Send(follower LogicalAddr, cmd Command) error {
 	if err != nil {
 		return err
 	}
+	x.spyOutgoing(follower, cmd)
 	x.dev.Send(follower, cmd.Op(), data)
 	return nil
 }
@@ -221,6 +299,7 @@ func (x *Cec) Reply(follower LogicalAddr, cmd Command) error {
 	if err != nil {
 		return err
 	}
+	x.spyOutgoing(follower, cmd)
 	x.dev.Reply(follower, cmd.Op(), data)
 	return nil
 }

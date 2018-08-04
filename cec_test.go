@@ -15,13 +15,15 @@
 package cec_test
 
 import (
-	"reflect"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/krynr/cec/device/fake"
 
 	. "github.com/krynr/cec"
 )
+
+var cmpOptions = cmp.AllowUnexported(GivePhysicalAddress{}, UnkownCmd{})
 
 func TestCec(t *testing.T) {
 	tests := []struct {
@@ -247,16 +249,75 @@ func TestCec(t *testing.T) {
 			if test.setup != nil {
 				test.setup(c)
 			}
-			out := d.Run(test.in, func() { c.Run() })
+			actual := d.Run(test.in, func() { c.Run() })
 			expected := test.out
-			if len(out) != len(expected) {
-				t.Errorf("Expected %d outputs, but received %d", len(expected), len(out))
+			if diff := cmp.Diff(actual, expected); diff != "" {
+				t.Errorf("Expected %#v, got %#v", expected, actual, diff)
+			}
+		})
+	}
+}
+
+func TestListener(t *testing.T) {
+	tests := []struct {
+		name  string
+		setup func(c *Cec)
+		in    []Packet
+		spied []Message
+	}{
+		{
+			name: "give_physical_address",
+			in: []Packet{
+				{TV, AudioSystem, OpGivePhysicalAddress, nil},
+			},
+			spied: []Message{
+				{TV, AudioSystem, GivePhysicalAddress{}},
+				{AudioSystem, Broadcast, ReportPhysicalAddress{fake.PhysicalAddress, DeviceTypeAudio}},
+			},
+		},
+		{
+			name: "unkown_opcode_broadcast",
+			in: []Packet{
+				{TV, Broadcast, OpCode(254), nil},
+			},
+			spied: []Message{
+				{TV, Broadcast, MakeUnknownCmd(OpCode(254), nil)},
+			},
+		},
+		{
+			name: "invalid_message",
+			in: []Packet{
+				{TV, AudioSystem, OpSetOSDName, nil},
+			},
+			spied: []Message{
+				{TV, AudioSystem, MakeUnknownCmd(OpSetOSDName, nil)},
+				{AudioSystem, TV, FeatureAbort{OpSetOSDName, AbortInvalidOperand}},
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			d := fake.New(AudioSystem, DeviceTypeAudio)
+			c, err := New(d, Config{
+				OSDName: "test",
+			})
+			if err != nil {
+				t.Errorf("Error setting up %s", err)
 				return
 			}
-			for i := range expected {
-				if !reflect.DeepEqual(out[i], expected[i]) {
-					t.Errorf("Expected %d-th output to be %s but got %s.", i, expected[i], out[i])
-				}
+
+			c.AddHandler(DefaultHandler{})
+
+			actual := make([]Message, 0, 16)
+			c.SetListenerFunc(func(msg Message) {
+				actual = append(actual, msg)
+			})
+
+			d.Run(test.in, func() { c.Run() })
+			expected := test.spied
+			if diff := cmp.Diff(actual, expected, cmpOptions); diff != "" {
+				t.Errorf("Expected %q, got %q", expected, actual, diff)
 			}
 		})
 	}

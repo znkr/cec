@@ -38,7 +38,8 @@ func New(addr cec.LogicalAddr, typ cec.DeviceType) *Device {
 	}
 }
 
-func (d *Device) Run(in []cec.Packet, await func()) (out []cec.Packet) {
+func (d *Device) Run(in []cec.Packet, await func()) []cec.Packet {
+	out := make([]cec.Packet, 0)
 	done := make(chan struct{})
 	go func() {
 		for _, p := range in {

@@ -36,7 +36,8 @@ type Cec struct {
 
 // A Handler for HDMI CEC messages.
 type Handler interface {
-	// Handles a message and returns true if the message was handled.
+	// Handles a message and returns true if the message was handled. Once a message is handled, it
+	// is considered done and is not passed to other handlers.
 	HandleMessage(x *Cec, msg Message) bool
 }
 
@@ -65,11 +66,13 @@ func (f UnhandledHandler) HandleMessage(x *Cec, msg Message) bool {
 		return true
 
 	case Standby:
-		// Standby is mandatory, but may be ignored. Returning here in order to not send a feature abort.
+		// Standby is mandatory, but may be ignored. Returning here in order to not send a feature
+		// abort.
 		return true
 	}
 
-	// Send FeatureAbort if this message was directly addressed to us. Unhandled broadcasts are ignored.
+	// Send FeatureAbort if this message was directly addressed to us. Unhandled broadcasts are
+	// ignored.
 	if msg.Follower != Broadcast {
 		log.Printf("Unexpected message: %s", msg)
 		x.Reply(msg.Initiator, FeatureAbort{
@@ -81,8 +84,8 @@ func (f UnhandledHandler) HandleMessage(x *Cec, msg Message) bool {
 	return true
 }
 
-// The DefaultHandler handles a set of standard messages. The handles messages are for physical address, vendor id, and
-// CEC version.
+// The DefaultHandler handles a set of standard messages. The handles messages are for physical
+// address, vendor id, and CEC version.
 type DefaultHandler struct{}
 
 // DefaultHandler implements Handler.
@@ -128,8 +131,8 @@ func New(dev Device, c Config) (*Cec, error) {
 	}, nil
 }
 
-// Adds a handler. If more than one handler is added all handlers are tried until one handler returns true.
-// May only be called before Start() was called.
+// Adds a handler. If more than one handler is added all handlers are tried until one handler
+// returns true. May only be called before Start() was called.
 func (x *Cec) AddHandler(h Handler) {
 	if x.started {
 		log.Panic("Already started.")
@@ -137,8 +140,8 @@ func (x *Cec) AddHandler(h Handler) {
 	x.handlers = append(x.handlers, h)
 }
 
-// Adds a handler in the form of a function. This is a convenience wrapper around AddHandler. May only be called before
-// Start() was called.
+// Adds a handler in the form of a function. This is a convenience wrapper around AddHandler. May
+// only be called before Start() was called.
 func (x *Cec) AddHandleFunc(f func(x *Cec, msg Message) bool) {
 	x.AddHandler(HandlerFunc(f))
 }

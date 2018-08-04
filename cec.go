@@ -148,6 +148,7 @@ func (x *Cec) AddHandleFunc(f func(x *Cec, msg Message) bool) {
 
 // Starts receiving and handling CEC messages.
 func (x *Cec) Run() {
+	x.started = true
 	unhandledHandler := UnhandledHandler{}
 	for p := range x.dev.Receive() {
 		msg, err := UnmarshalMessage(p)

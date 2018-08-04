@@ -9,7 +9,7 @@ support for additional messages is straight forward.
 
 The CEC logic itself is implemented on top of a device abstraction that should make it possible to
 support all devices that allow access to the raw CEC messages. However, at the moment only an
-implementation for the Rapsberry Pi exists, as well as a fake for testing.
+implementation for the Raspberry Pi exists, as well as a fake for testing.
 
 ## Getting Started with a Raspberry Pi
 

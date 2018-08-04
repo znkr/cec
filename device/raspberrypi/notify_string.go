@@ -2,7 +2,7 @@
 
 package raspberrypi
 
-import "fmt"
+import "strconv"
 
 const (
 	_notify_name_0 = "notifyTxnotifyRx"
@@ -17,13 +17,6 @@ const (
 
 var (
 	_notify_index_0 = [...]uint8{0, 8, 16}
-	_notify_index_1 = [...]uint8{0, 19}
-	_notify_index_2 = [...]uint8{0, 19}
-	_notify_index_3 = [...]uint8{0, 19}
-	_notify_index_4 = [...]uint8{0, 19}
-	_notify_index_5 = [...]uint8{0, 17}
-	_notify_index_6 = [...]uint8{0, 14}
-	_notify_index_7 = [...]uint8{0, 21}
 )
 
 func (i notify) String() string {
@@ -46,6 +39,6 @@ func (i notify) String() string {
 	case i == 32768:
 		return _notify_name_7
 	default:
-		return fmt.Sprintf("notify(%d)", i)
+		return "notify(" + strconv.FormatInt(int64(i), 10) + ")"
 	}
 }

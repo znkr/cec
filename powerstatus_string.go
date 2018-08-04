@@ -2,7 +2,7 @@
 
 package cec
 
-import "fmt"
+import "strconv"
 
 const _PowerStatus_name = "PowerStatusOnPowerStatusStandbyPowerStatusOnTransitionPowerStatusStandbyTransition"
 
@@ -10,7 +10,7 @@ var _PowerStatus_index = [...]uint8{0, 13, 31, 54, 82}
 
 func (i PowerStatus) String() string {
 	if i >= PowerStatus(len(_PowerStatus_index)-1) {
-		return fmt.Sprintf("PowerStatus(%d)", i)
+		return "PowerStatus(" + strconv.FormatInt(int64(i), 10) + ")"
 	}
 	return _PowerStatus_name[_PowerStatus_index[i]:_PowerStatus_index[i+1]]
 }

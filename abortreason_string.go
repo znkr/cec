@@ -2,7 +2,7 @@
 
 package cec
 
-import "fmt"
+import "strconv"
 
 const _AbortReason_name = "AbortUnrecognizedOpCodeAbortNotInCorrectModeAbortCannotProvideSourceAbortInvalidOperandAbortRefused"
 
@@ -10,7 +10,7 @@ var _AbortReason_index = [...]uint8{0, 23, 44, 68, 87, 99}
 
 func (i AbortReason) String() string {
 	if i >= AbortReason(len(_AbortReason_index)-1) {
-		return fmt.Sprintf("AbortReason(%d)", i)
+		return "AbortReason(" + strconv.FormatInt(int64(i), 10) + ")"
 	}
 	return _AbortReason_name[_AbortReason_index[i]:_AbortReason_index[i+1]]
 }

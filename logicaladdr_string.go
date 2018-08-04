@@ -2,7 +2,7 @@
 
 package cec
 
-import "fmt"
+import "strconv"
 
 const _LogicalAddr_name = "TVRec1Rec2Tuner1Playback1AudioSystemTuner2Tuner3Playback2Rec3Tuner4Playback3Reserved1Reserved2FreeUseUnregistered"
 
@@ -10,7 +10,7 @@ var _LogicalAddr_index = [...]uint8{0, 2, 6, 10, 16, 25, 36, 42, 48, 57, 61, 67,
 
 func (i LogicalAddr) String() string {
 	if i >= LogicalAddr(len(_LogicalAddr_index)-1) {
-		return fmt.Sprintf("LogicalAddr(%d)", i)
+		return "LogicalAddr(" + strconv.FormatInt(int64(i), 10) + ")"
 	}
 	return _LogicalAddr_name[_LogicalAddr_index[i]:_LogicalAddr_index[i+1]]
 }

@@ -2,7 +2,7 @@
 
 package cec
 
-import "fmt"
+import "strconv"
 
 const (
 	_DeviceType_name_0 = "DeviceTypeTVDeviceTypeRecDeviceTypeReservedDeviceTypeTunerDeviceTypePlaybackDeviceTypeAudioDeviceTypeSwitchDeviceTypeVidProc"
@@ -11,7 +11,6 @@ const (
 
 var (
 	_DeviceType_index_0 = [...]uint8{0, 12, 25, 43, 58, 76, 91, 107, 124}
-	_DeviceType_index_1 = [...]uint8{0, 17}
 )
 
 func (i DeviceType) String() string {
@@ -21,6 +20,6 @@ func (i DeviceType) String() string {
 	case i == 15:
 		return _DeviceType_name_1
 	default:
-		return fmt.Sprintf("DeviceType(%d)", i)
+		return "DeviceType(" + strconv.FormatInt(int64(i), 10) + ")"
 	}
 }

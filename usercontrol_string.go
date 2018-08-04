@@ -2,7 +2,7 @@
 
 package cec
 
-import "fmt"
+import "strconv"
 
 const (
 	_UserControl_name_0 = "UcSelectUcUpUcDownUcLeftUcRightUcRightUpUcRightDownUcLeftUpUcLeftDownUcRootMenuUcSetupMenuUcContentsMenuUcFavoriteMenuUcExit"
@@ -47,6 +47,6 @@ func (i UserControl) String() string {
 		i -= 113
 		return _UserControl_name_6[_UserControl_index_6[i]:_UserControl_index_6[i+1]]
 	default:
-		return fmt.Sprintf("UserControl(%d)", i)
+		return "UserControl(" + strconv.FormatInt(int64(i), 10) + ")"
 	}
 }

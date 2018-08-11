@@ -31,7 +31,7 @@ func TestIsValidOsdNameValid(t *testing.T) {
 	}
 	for _, s := range valid {
 		if !isValidOsdName(s) {
-			t.Errorf("%s should be valid, but isValidOsdName returns false.", s)
+			t.Errorf("%v should be valid, but isValidOsdName returns false.", s)
 		}
 	}
 }
@@ -44,7 +44,7 @@ func TestIsValidOsdNameInvalid(t *testing.T) {
 	}
 	for _, s := range invalid {
 		if isValidOsdName(s) {
-			t.Errorf("%s should be invalid, but isValidOsdName returns true.", s)
+			t.Errorf("%v should be invalid, but isValidOsdName returns true.", s)
 		}
 	}
 }
@@ -52,6 +52,6 @@ func TestIsValidOsdNameInvalid(t *testing.T) {
 func TestIsValidVendorID(t *testing.T) {
 	invalid := uint32(0x01000000)
 	if isValidVendorId(invalid) {
-		t.Errorf("%s should be invalid, but isValidVendorId return true.", invalid)
+		t.Errorf("%v should be invalid, but isValidVendorId return true.", invalid)
 	}
 }

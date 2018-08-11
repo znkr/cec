@@ -252,7 +252,7 @@ func TestCec(t *testing.T) {
 			actual := d.Run(test.in, func() { c.Run() })
 			expected := test.out
 			if diff := cmp.Diff(actual, expected); diff != "" {
-				t.Errorf("Expected %#v, got %#v", expected, actual, diff)
+				t.Errorf("Expected %#v, got %#v: %v", expected, actual, diff)
 			}
 		})
 	}
@@ -317,7 +317,7 @@ func TestListener(t *testing.T) {
 			d.Run(test.in, func() { c.Run() })
 			expected := test.spied
 			if diff := cmp.Diff(actual, expected, cmpOptions); diff != "" {
-				t.Errorf("Expected %q, got %q", expected, actual, diff)
+				t.Errorf("Expected %q, got %q: %v", expected, actual, diff)
 			}
 		})
 	}

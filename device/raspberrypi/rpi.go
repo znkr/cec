@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// +build linux
+
 // This package provides a way to use the Raspberry PI hardware for CEC.
 package raspberrypi
-
-//go:generate stringer -type=notify
 
 import (
 	"log"
@@ -38,20 +38,6 @@ static inline void register_rpi_cec_callback() {
 }
 */
 import "C"
-
-type notify uint32
-
-const (
-	notifyTx              notify = 1 << 0
-	notifyRx              notify = 1 << 1
-	notifyButtonPressed   notify = 1 << 2
-	notifyButtonRelease   notify = 1 << 3
-	notifyRemotePressed   notify = 1 << 4
-	notifyRemoteRelease   notify = 1 << 5
-	notifyLogicalAddr     notify = 1 << 6
-	notifyTopology        notify = 1 << 7
-	notifyLogicalAddrLost notify = 1 << 15
-)
 
 const vendorID = 0x18C086 // Broadcom
 

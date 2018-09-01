@@ -1,6 +1,8 @@
 cec - a Go library to work with HDMI CEC
 ========================================
 
+[![Build Status](https://travis-ci.org/krynr/cec.svg?branch=master)](https://travis-ci.org/krynr/cec)
+
 ## Intro
 
 `cec` provides a low-level HDMI CEC interface implementing basic protocol rules, parsing, and error

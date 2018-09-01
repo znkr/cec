@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// +build linux
+// +build raspberrypi
 
 // This package provides a way to use the Raspberry PI hardware for CEC.
 package raspberrypi

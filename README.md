@@ -81,7 +81,8 @@ func main() {
 ```
 
 Since the `raspberrypi` package depends on Raspberry Pi C interfaces, it is easiest to build the
-binary directly on the device instead of using a cross compiler.
+binary directly on the device instead of using a cross compiler. The package also needs
+`-tags raspberrypi` on the command line in order to compile the Raspberry Pi device.
 
 ## Disclaimer
 

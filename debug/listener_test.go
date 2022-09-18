@@ -18,7 +18,7 @@ package debug
 import (
 	"testing"
 
-	"github.com/krynr/cec"
+	"znkr.io/cec"
 )
 
 func TestLoggingHandler(t *testing.T) {

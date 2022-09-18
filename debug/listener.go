@@ -19,8 +19,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/krynr/cec"
-	"github.com/krynr/cec/debug/util/log"
+	"znkr.io/cec"
+	"znkr.io/cec/debug/util/log"
 )
 
 type LogEntry struct {

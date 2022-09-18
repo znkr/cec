@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build raspberrypi
 // +build raspberrypi
 
 // This package provides a way to use the Raspberry PI hardware for CEC.
@@ -21,7 +22,7 @@ import (
 	"log"
 	"unsafe"
 
-	"github.com/krynr/cec"
+	"znkr.io/cec"
 )
 
 /*
@@ -80,9 +81,10 @@ func handleOutgoing(out <-chan outgoing) {
 	}
 }
 
-//export rpi_cec_callback
 // For a description of the arguments of this callback see
 // https://github.com/raspberrypi/firmware/blob/master/opt/vc/include/interface/vmcs_host/vc_cec.h
+//
+//export rpi_cec_callback
 func rpi_cec_callback(p unsafe.Pointer, hdr, p1, p2, p3, p4 uint32) {
 	n := notify((hdr >> 0) & 0xffff)
 

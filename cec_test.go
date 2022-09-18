@@ -18,9 +18,9 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/krynr/cec/device/fake"
+	"znkr.io/cec/device/fake"
 
-	. "github.com/krynr/cec"
+	. "znkr.io/cec"
 )
 
 var cmpOptions = cmp.AllowUnexported(GivePhysicalAddress{}, UnkownCmd{})

@@ -16,7 +16,7 @@
 package fake
 
 import (
-	"github.com/krynr/cec"
+	"znkr.io/cec"
 )
 
 type Device struct {
